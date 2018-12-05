@@ -6,7 +6,8 @@ namespace WaveAnalyzer
 {
     public partial class fourier : Form
     {
-        public fourier(byte[] b, byte[] w, int index) // Constructor accepts byte array from Load.cs.
+        // Constructor accepts byte array from Load.cs.
+        public fourier(byte[] b, byte[] w, int index) 
         {
            
             wav = w;
@@ -42,20 +43,23 @@ namespace WaveAnalyzer
                 chart1.Series["Series1"].Points.AddXY
                 (i, result[i]);
             }
-            //***************************************************************
 
             //Display results of fourier.
             chart1.Series["Series1"].ChartType =
                                 System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
             chart1.Series["Series1"].Color = Color.Blue;
         }
-        static double bytesToDouble(byte firstByte, byte secondByte) // Function for converting 2 bytes to a double.
+
+        // Function for converting 2 bytes to a double.
+        static double bytesToDouble(byte firstByte, byte secondByte) 
         {
             ushort value = BitConverter.ToUInt16(new byte[2] { (byte)firstByte, (byte)secondByte }, 0);
             // convert to range from -1 to (just below) 1
             return value / 32768.0;
         }
-        private void chart1_Click(object sender, EventArgs e) // Methods repaints the chart on mouseclick into 2 series.
+
+        // Methods repaints the chart on mouseclick into 2 series.
+        private void chart1_Click(object sender, EventArgs e) 
         {
             int tempS = (int)chart1.ChartAreas[0].CursorX.Position;
             chart1.Series["Series1"].Points.Clear();
@@ -91,12 +95,15 @@ namespace WaveAnalyzer
         byte[] convolvedWav;
         double[] convolvedResult; // Storing whole convolved wav in a double array.
 
-        private void button1_Click(object sender, EventArgs e) // Method creates filter, Filter Selection.
+        // Method creates filter, Filter Selection.
+        private void button1_Click(object sender, EventArgs e) 
         {
             convolution();
             Load newForm = new Load(convolvedWav);
             newForm.Show();
         }
+
+        // Method performs convolution.
         private void convolution()
         {
            int wl = wav.Length / 8; // Byte array length converter to double array length.
@@ -107,7 +114,7 @@ namespace WaveAnalyzer
            for (int i = 0; i < convolveMax; i++) // Take samples from wav for as many sample lengths in wav lengths. 
            {
                 nSamples = new byte[lpl*8]; // Clear nSamples array.
-                Array.Copy(wav, i * lpl*8, nSamples, 0, lpl*8); // Copy samples to temporary byte array.
+                Array.Copy(wav, 44 + (i * lpl*8), nSamples, 0, lpl*8); // Copy samples to temporary byte array.
                 
                 double[] doubleWav = new double[lpl*2 - 1]; // Convert bytes to double array.
 
@@ -116,7 +123,7 @@ namespace WaveAnalyzer
 
                 for (int j = 0; j < lpl; j++)
                 {
-                   for(int k = 0; k < lpl; k++) // Multiply samples
+                   for(int k = 0; k < lpl; k++) // Multiply samples.
                    {
                        convolvedResult[i*lpl+j] += lowpass[k] * doubleWav[j + k];
                    }
@@ -128,20 +135,20 @@ namespace WaveAnalyzer
             var result = new byte[convolvedResult.Length * sizeof(double)];
             Buffer.BlockCopy(convolvedResult, 0, result, 0, result.Length);
             convolvedWav = result;
-            //if (wl % lpl > 0) // Add an extra iteration if the filter does not divide into the wav length perfectly.
-            //  convolveMax++;
 
         }
-        private void inverseFourier(double[] b) // Perform inverse fourier on the filter lowpass[] and display.
+
+        // Perform inverse fourier on the filter lowpass[] and display.
+        private void inverseFourier(double[] b) 
         {
             chart1.Series["Series1"].Points.Clear();
             chart1.Series["Series2"].Points.Clear();
 
             double[] real = new double[n];
             double[] imag = new double[n];
-            double pi_div = 2.0 * Math.PI / n; // Set value of 2*pi/n
+            double pi_div = 2.0 * Math.PI / n; // Set value of 2*pi/n.
             int m = n;
-            for (int i = 1; i < m; i++) // m == N total number of samples
+            for (int i = 1; i < m; i++) // m == N total number of samples.
             {
                 double a = i * pi_div;
                 for (int t = 0; t < n; t++)
@@ -158,17 +165,19 @@ namespace WaveAnalyzer
                     System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             chart1.Series["Series1"].Color = Color.Blue;
         }
-        private double triangleFunction(double little_n, double N) // Triangular window function.
+
+        // Triangular window function.
+        private double triangleFunction(double little_n, double N) 
         {
-            return 1 - Math.Abs((little_n - ((N - 1) / 2)) / (N / 2)); //Assume L == N
+            return 1 - Math.Abs((little_n - ((N - 1) / 2)) / (N / 2)); //Assume L == N according to wikipedia.
         }
         private double welchFunction(double little_n, double N) // Welch window function.
         {
             return 1 - Math.Pow((little_n - ((N - 1) / 2)) / ((N -1)/ 2), 2);
         }
 
-
-        private void button2_Click(object sender, EventArgs e) // Create Filter
+        // Create Filter button.
+        private void button2_Click(object sender, EventArgs e) 
         {
             inverseFourier(lowpass); // Button performs inverse fourier on filter.
         }
