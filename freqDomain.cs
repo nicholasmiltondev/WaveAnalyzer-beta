@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace WaveAnalyzer
 {
-    public partial class freqDomain : Form
+    public partial class freqDomain : Form // Defunct fourier for the signal form. Completely integerated into fourier.cs
     {
         public freqDomain()
         {

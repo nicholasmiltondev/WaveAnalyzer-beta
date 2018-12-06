@@ -179,6 +179,7 @@
             this.Controls.Add(this.chart1);
             this.Name = "Signal";
             this.Text = "Signal Capture";
+            this.Load += new System.EventHandler(this.Signal_Load_1);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

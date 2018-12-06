@@ -8,7 +8,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace WaveAnalyzer
 {
-    public partial class Signal : Form
+    public partial class Signal : Form // Defunct 1st attempt at a wave analyzer.
     {
         public Signal()
         {
@@ -82,6 +82,9 @@ namespace WaveAnalyzer
 
         }
 
+        private void Signal_Load_1(object sender, EventArgs e)
+        {
 
+        }
     }
 }
