@@ -94,6 +94,7 @@ namespace WaveAnalyzer
             this.chart1.Size = new System.Drawing.Size(745, 300);
             this.chart1.TabIndex = 1;
             this.chart1.Text = "chart1";
+            chart1.ChartAreas[0].AxisX.Minimum = 0;
             title9.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             title9.Name = "Sample";
             title9.Text = "Sample";

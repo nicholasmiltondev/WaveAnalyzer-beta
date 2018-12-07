@@ -20,21 +20,25 @@ namespace WaveAnalyzer
         wavHeader header; // Struct for stores wav header
 
 
-        
+
         // Export/Save data button.
         private void button8_Click(object sender, EventArgs e)
         {
+            Stream myStream;
             // Displays a SaveFileDialog so the user can save the Image  
             // assigned to Button2.  
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "Wav Audio|*.wav|Nick's WAV files|*.nick";
             saveFileDialog1.Title = "Save a wav File";
-            saveFileDialog1.ShowDialog();
+            saveFileDialog1.RestoreDirectory = true;
 
-            // If the file name is not an empty string open it for saving.  
-            if (saveFileDialog1.FileName != "")
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                
+                if ((myStream = saveFileDialog1.OpenFile()) != null)
+                {
+                    saveWav(myStream);
+                    myStream.Close();
+                }
             }
         }
         //##########################################################################################new work
@@ -43,11 +47,9 @@ namespace WaveAnalyzer
         {
 
             chart2.Series["Series1"].Points.Clear(); // Clear chart to make way for new data.
-            int i = 0;
-            foreach (float f in sampleSelectionCopied)
+            for (int i = 0; i < sampleSelectionCopied.Length; i += 8)
             {
-                chart2.Series["Series1"].Points.AddXY(i, f);
-                i++;
+                chart2.Series["Series1"].Points.AddXY(i, sampleSelectionCopied[i]);
             }
 
             chart2.Series["Series1"].ChartType =
@@ -58,11 +60,9 @@ namespace WaveAnalyzer
         public void repaintChart3(float[] paintArray)
         {
             chart1.Series["Series1"].Points.Clear(); // Clear chart to make way for new data.
-            int i = 0;
-            foreach (float f in sample)
-            {
-                chart1.Series["Series1"].Points.AddXY(i, f);
-                i++;
+            for(int i = 0; i < sample.Length; i += 8)
+            { 
+                chart1.Series["Series1"].Points.AddXY(i, sample[i]);
             }
             chart1.Series["Series1"].ChartType =
         System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
@@ -106,14 +106,13 @@ namespace WaveAnalyzer
                     Array.Copy(sample, 0, samplePasteBuffer, 0, sl);
                 }
                 Array.Copy(sampleSelectionCopied, 0, samplePasteBuffer, xS, cl); // Insert the copied data at xS
-                sample = samplePasteBuffer;
             }
             else // If the paste doesnt increase the length of the wave then...
             {
-                samplePasteBuffer = sample;
                 Array.Copy(sampleSelectionCopied, 0, samplePasteBuffer, xS, cl);
-                sample = samplePasteBuffer;
+                
             }
+            sample = samplePasteBuffer;
             repaintChart3(sample); // Show new wave.
         }
         // Method returns x position of chart clicked.
@@ -178,6 +177,36 @@ namespace WaveAnalyzer
                 repaintChart3(sample); // Plot the byte array.
             }
         }
+        void saveWav(Stream fs)
+        {
+                    BinaryWriter bw = new BinaryWriter(fs);
+                    bw.Write(header.chunkID);
+                    bw.Write(header.fileSize);
+                    bw.Write(header.riffType);
+                    bw.Write(header.fmtID);
+                    bw.Write(header.fmtSize);
+                    bw.Write(header.fmtCode);
+                    bw.Write(header.channels);
+                    bw.Write(header.sampleRate);
+                    bw.Write(header.byteRate);
+                    bw.Write(header.fmtBlockAlign);
+                    bw.Write(header.bitDepth);
+                    //bw.Write(header.fmtExtraSize);
+                    bw.Write(header.dataID);
+                    bw.Write(header.bytes);
+
+                    for (int i = 0; i < header.bytes / header.fmtBlockAlign; i++)
+                    {
+                        if (i < sample.Length)
+                        {
+                            bw.Write((ushort)(sample[i]));
+                        }
+                        else
+                        {
+                            bw.Write(0);
+                        }
+                    }
+        }
         // Method reads wav file from filestream.
         void readWav(string filename)
         {
@@ -191,6 +220,7 @@ namespace WaveAnalyzer
                     int chunkID = reader.ReadInt32();
                     int fileSize = reader.ReadInt32();
                     int riffType = reader.ReadInt32();
+
                     int fmtID = reader.ReadInt32();
                     int fmtSize = reader.ReadInt32();
                     int fmtCode = reader.ReadInt16();
@@ -205,25 +235,25 @@ namespace WaveAnalyzer
                         fmtExtraSize = reader.ReadInt16();
                         reader.ReadBytes(fmtExtraSize);
                     }
-                    
+
                     int dataID = reader.ReadInt32();
                     int bytes = reader.ReadInt32();
 
-                    header = new wavHeader(chunkID, fileSize, riffType, fmtID, fmtSize, fmtCode, channels, sampleRate, byteRate, fmtBlockAlign, bitDepth, fmtExtraSize, dataID, bytes);
-                    fillListFromWavHeader(header); // Construct the wav header struct.
-
                     byte[] byteArray = reader.ReadBytes(bytes); // Read all the data into the byte array.
 
+                    header = new wavHeader(chunkID, fileSize, riffType, fmtID, fmtSize, fmtCode, channels, sampleRate, byteRate, fmtBlockAlign, bitDepth, fmtExtraSize, dataID, bytes);
+                    fillListFromWavHeader(header); // Construct the wav header struct.
+                    
                     int bytesForSamp = bitDepth / 8;
                     int samps = bytes / bytesForSamp;
 
 
                     sample = null;
 
-                            Int16[]
-                            asInt16 = new Int16[samps];
-                            Buffer.BlockCopy(byteArray, 0, asInt16, 0, bytes);
-                            sample = Array.ConvertAll(asInt16, e => e / (float)Int16.MaxValue);
+                    Int16[]
+                    asInt16 = new Int16[samps];
+                    Buffer.BlockCopy(byteArray, 0, asInt16, 0, bytes);
+                    sample = Array.ConvertAll(asInt16, e => e / (float)Int16.MaxValue);
                 }
             }
             catch
@@ -251,7 +281,7 @@ namespace WaveAnalyzer
             public wavHeader(int chunkID, int fileSize, int riffType, int fmtID, int fmtSize, int fmtCode, int channels, int sampleRate, int byteRate, int fmtBlockAlign, int bitDepth, int fmtExtraSize, int dataID, int bytes)
             {
                 this.chunkID = chunkID;
-                this.fileSize = chunkID;
+                this.fileSize = fileSize;
                 this.riffType = riffType;
                 this.fmtID = fmtID;
                 this.fmtSize = fmtSize;

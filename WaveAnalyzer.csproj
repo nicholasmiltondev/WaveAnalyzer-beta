@@ -51,7 +51,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Chunks.cs" />
     <Compile Include="fourier.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,7 +83,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WaveGenerator.cs" />
     <EmbeddedResource Include="fourier.resx">
       <DependentUpon>fourier.cs</DependentUpon>
     </EmbeddedResource>
