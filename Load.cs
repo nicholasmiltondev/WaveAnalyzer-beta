@@ -30,11 +30,12 @@ namespace WaveAnalyzer
             saveFileDialog1.Filter = "Wav Audio|*.wav|Nick's WAV files|*.nick";
             saveFileDialog1.Title = "Save a wav File";
             saveFileDialog1.ShowDialog();
-
+            
             // If the file name is not an empty string open it for saving.  
             if (saveFileDialog1.FileName != "")
             {
-
+                FileStream fs = (FileStream)saveFileDialog1.OpenFile();
+                saveWav(fs);
             }
         }
         //##########################################################################################new work
@@ -76,8 +77,8 @@ namespace WaveAnalyzer
             }
             else
             {
-                for (int j = 0; j < sampleSelectionCopied.Length; j += 8)
-                    chart2.Series["Series1"].Points.AddXY(j, sampleSelectionCopied[j]);
+                for (int j = 0; j < sample.Length; j += 8)
+                    chart1.Series["Series1"].Points.AddXY(j, sample[j]);
             }
             
             chart1.Series["Series1"].ChartType =
@@ -194,7 +195,7 @@ namespace WaveAnalyzer
                 repaintChart3(sample); // Plot the byte array.
             }
         }
-        void saveWav(Stream fs)
+        void saveWav(FileStream fs)
         {
             BinaryWriter bw = new BinaryWriter(fs);
 
