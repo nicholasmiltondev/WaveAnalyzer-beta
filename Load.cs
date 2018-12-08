@@ -11,7 +11,7 @@ namespace WaveAnalyzer
     {
         public double ReadInt32 { get; private set; }
 
-        float[] sample;
+        static float[] sample;
         float[] sampleSelectionCopied;
         float[] samplePasteBuffer;
         private int xE; // End of user selection
@@ -195,34 +195,37 @@ namespace WaveAnalyzer
                 repaintChart3(sample); // Plot the byte array.
             }
         }
-        void saveWav(FileStream fs)
+        // Method writes header and wav to stream.
+        void saveWav(FileStream fs) 
         {
             BinaryWriter bw = new BinaryWriter(fs);
 
-            header.bytes = sample.Length * header.fmtBlockAlign; // Recalculate these 1st.
-            header.fileSize = header.bytes + 36;
+            header.bytes = (sample.Length+1) * header.fmtBlockAlign; // Recalculate these 1st.
+            header.fileSize = header.bytes + 44;
 
-            bw.Write(header.chunkID);
-            bw.Write(header.fileSize);
+            bw.Write(header.chunkID); // Write header.
+            bw.Write((uint)header.fileSize);
             bw.Write(header.riffType);
             bw.Write(header.fmtID);
-            bw.Write(header.fmtSize);
-            bw.Write(header.fmtCode);
-            bw.Write(header.channels);
-            bw.Write(header.sampleRate);
-            bw.Write(header.byteRate);
-            bw.Write(header.fmtBlockAlign);
-            bw.Write(header.bitDepth);
+            bw.Write((uint)header.fmtSize);
+            bw.Write((ushort)header.fmtCode);
+            bw.Write((ushort)header.channels);
+            bw.Write((uint)header.sampleRate);
+            bw.Write((uint)header.byteRate);
+            bw.Write((ushort)header.fmtBlockAlign);
+            bw.Write((ushort)header.bitDepth);
             //bw.Write(header.fmtExtraSize);
             bw.Write(header.dataID);
-            bw.Write(header.bytes);
-
-            for (int i = 0; i < header.bytes / header.fmtBlockAlign; i++)
+            bw.Write((uint)header.bytes);
+            
+            for (int i = 0; i < sample.Length - 1; i++) // Writes mono only.
             {
 
-                bw.Write((short)(sample[i]));
-
+                    short x = Convert.ToInt16(sample[i]* (float)Int16.MaxValue); // Convert from -1 to 1 to -32,768 to 32,767.
+                bw.Write(x);
             }
+            bw.Write((short)0);
+            bw.Write((short)0);
         }
         // Method reads wav file from filestream.
         void readWav(string filename)
