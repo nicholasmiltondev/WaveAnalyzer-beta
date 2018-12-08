@@ -9,22 +9,19 @@ namespace WaveAnalyzer
 
     public partial class Load : Form
     {
-        public double ReadInt32 { get; private set; }
 
-        static float[] sample;
-        float[] sampleSelectionCopied;
-        float[] samplePasteBuffer;
-        private int xE; // End of user selection
-        private int xS; // Start of user selection
-        public bool zoom; // Boolean determines if you can zoom
-        wavHeader header; // Struct for stores wav header
-
-
+        static float[] sample; // Float array that holds sound data.
+        float[] sampleSelectionCopied; // Temporary array holds copied selection.
+        float[] samplePasteBuffer; // Temporary array holds results of cut/copy/paste.
+        private int xE; // End of user selection.
+        private int xS; // Start of user selection.
+        public bool zoom; // Boolean determines if you can zoom.
+        wavHeader header; // Struct for stores wav header.
 
         // Export/Save data button.
         private void button8_Click(object sender, EventArgs e)
         {
-            // Displays a SaveFileDialog so the user can save the Image  
+            // Displays a SaveFileDialog so the user can save the Image.
             // assigned to Button2.  
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "Wav Audio|*.wav|Nick's WAV files|*.nick";
@@ -38,7 +35,6 @@ namespace WaveAnalyzer
                 saveWav(fs);
             }
         }
-        //##########################################################################################new work
         // Method plots selected data to the 2nd chart.
         public void repaintChart2()
         {
@@ -63,11 +59,11 @@ namespace WaveAnalyzer
                     System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             chart2.Series["Series1"].Color = Color.DarkOrange;
         }
-        // Method charts float array.
+        // Method charts float array to the main chart.
         public void repaintChart3(float[] paintArray)
         {
             chart1.Series["Series1"].Points.Clear(); // Clear chart to make way for new data.
-            if(sample.Length < 50000) {
+            if(sample.Length < 50000) { // If sample is short, then plot all points.
                 int i = 0;
                 foreach (float f in sample)
                 {
@@ -78,7 +74,7 @@ namespace WaveAnalyzer
             else
             {
                 for (int j = 0; j < sample.Length; j += 8)
-                    chart1.Series["Series1"].Points.AddXY(j, sample[j]);
+                    chart1.Series["Series1"].Points.AddXY(j, sample[j]); // Cut down number of points for efficiency.
             }
             
             chart1.Series["Series1"].ChartType =
@@ -272,7 +268,7 @@ namespace WaveAnalyzer
                     Int16[]
                     asInt16 = new Int16[samps];
                     Buffer.BlockCopy(byteArray, 0, asInt16, 0, bytes);
-                    sample = Array.ConvertAll(asInt16, e => e / (float)Int16.MaxValue);
+                    sample = Array.ConvertAll(asInt16, e => e / (float)Int16.MaxValue); // Convert to range of -1 to 1.
                 }
             }
             catch
@@ -374,5 +370,6 @@ namespace WaveAnalyzer
         {
 
         }
+        public double ReadInt32 { get; private set; }
     }
 }
