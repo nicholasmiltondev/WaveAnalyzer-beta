@@ -132,7 +132,6 @@ namespace WaveAnalyzer
                 }
 
                 lowpass[i] = Math.Sqrt((real[i] * real[i])) / n;
-                Console.WriteLine(lowpass[i]);
                 chart1.Series["Series1"].Points.AddXY
                 (i, lowpass[i]);
             }

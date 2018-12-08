@@ -43,11 +43,19 @@ namespace WaveAnalyzer
         {
 
             chart2.Series["Series1"].Points.Clear(); // Clear chart to make way for new data.
+
             int i = 0;
-            foreach (float f in sampleSelectionCopied)
+            if (sampleSelectionCopied.Length < 50000) //Clarity for test waves lost if less points plotted.
             {
-                chart2.Series["Series1"].Points.AddXY(i, f);
-                i++;
+                foreach (float f in sampleSelectionCopied)
+                {
+                    chart2.Series["Series1"].Points.AddXY(i, f);
+                    i++;
+                }
+            } else
+            {
+                for(int j = 0; j < sampleSelectionCopied.Length; j += 8)
+                    chart2.Series["Series1"].Points.AddXY(j, sampleSelectionCopied[j]);
             }
 
             chart2.Series["Series1"].ChartType =
@@ -58,12 +66,20 @@ namespace WaveAnalyzer
         public void repaintChart3(float[] paintArray)
         {
             chart1.Series["Series1"].Points.Clear(); // Clear chart to make way for new data.
-            int i = 0;
-            foreach (float f in sample)
-            {
-                chart1.Series["Series1"].Points.AddXY(i, f);
-                i++;
+            if(sample.Length < 50000) {
+                int i = 0;
+                foreach (float f in sample)
+                {
+                    chart1.Series["Series1"].Points.AddXY(i, f);
+                    i++;
+                }
             }
+            else
+            {
+                for (int j = 0; j < sampleSelectionCopied.Length; j += 8)
+                    chart2.Series["Series1"].Points.AddXY(j, sampleSelectionCopied[j]);
+            }
+            
             chart1.Series["Series1"].ChartType =
         System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             chart1.Series["Series1"].Color = Color.DarkOrange;
@@ -209,7 +225,7 @@ namespace WaveAnalyzer
         }
         // Method reads wav file from filestream.
         void readWav(string filename)
-        { // BitConverter.ToInt16(filename, 
+        { 
             try
             {
                 using (FileStream fs = File.Open(filename, FileMode.Open))
